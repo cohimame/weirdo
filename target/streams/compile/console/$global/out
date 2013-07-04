@@ -1,0 +1,11 @@
+[0m[[0mdebug[0m] [0mStarting sandboxed run...[0m
+[0m[[0mdebug[0m] [0mWaiting for threads to exit or System.exit to be called.[0m
+[0m[[0mdebug[0m] [0mWaiting for thread run-main to exit[0m
+[0m[[0minfo[0m] [0mStarting scala interpreter...[0m
+[0m[[0mdebug[0m] [0m  Boot classpath: C:\Program Files\Java\jre6\lib\resources.jar;C:\Program Files\Java\jre6\lib\rt.jar;C:\Program Files\Java\jre6\lib\sunrsasign.jar;C:\Program Files\Java\jre6\lib\jsse.jar;C:\Program Files\Java\jre6\lib\jce.jar;C:\Program Files\Java\jre6\lib\charsets.jar;C:\Program Files\Java\jre6\lib\modules\jdk.boot.jar;C:\Program Files\Java\jre6\classes;C:\Users\Administrator\.sbt\boot\scala-2.10.0\lib\scala-library.jar[0m
+[0m[[0mdebug[0m] [0m  Classpath: E:\workspace\akka-labs\proto_lab\target\scala-2.10\classes;C:\Users\Administrator\.ivy2\cache\com.typesafe.akka\akka-actor_2.10\bundles\akka-actor_2.10-2.1.2.jar;C:\Users\Administrator\.ivy2\cache\com.typesafe\config\bundles\config-1.0.0.jar;C:\Users\Administrator\.ivy2\cache\com.typesafe.akka\akka-remote_2.10\bundles\akka-remote_2.10-2.1.2.jar;C:\Users\Administrator\.ivy2\cache\io.netty\netty\bundles\netty-3.5.8.Final.jar;C:\Users\Administrator\.ivy2\cache\com.google.protobuf\protobuf-java\jars\protobuf-java-2.4.1.jar;C:\Users\Administrator\.ivy2\cache\org.uncommons.maths\uncommons-maths\jars\uncommons-maths-1.2.2a.jar;C:\Users\Administrator\.ivy2\cache\com.typesafe.akka\akka-kernel_2.10\jars\akka-kernel_2.10-2.1.2.jar;C:\Users\Administrator\.sbt\boot\scala-2.10.0\lib\scala-compiler.jar;C:\Users\Administrator\.sbt\boot\scala-2.10.0\lib\jline.jar;C:\Users\Administrator\.sbt\boot\scala-2.10.0\lib\scala-reflect.jar;C:\Users\Administrator\.sbt\boot\scala-2.10.0\lib\jansi.jar[0m
+[0m[[0minfo[0m] [0m[0m
+[0m[[0mdebug[0m] [0m	Thread run-main exited.[0m
+[0m[[0mdebug[0m] [0mInterrupting remaining threads (should be all daemons).[0m
+[0m[[0mdebug[0m] [0mSandboxed run complete..[0m
+[0m[[0mdebug[0m] [0mExited with code 0[0m

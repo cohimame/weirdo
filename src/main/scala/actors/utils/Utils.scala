@@ -1,4 +1,4 @@
-package actors
+package actors.utils
 
 import java.io._
 
@@ -16,6 +16,7 @@ object Utils {
     case head :: tail if head.isDirectory => head :: exploreFileTree(head.listFiles().toList ::: tail)
     case Nil => Nil
   }
+
 
   /**
    * Generates [filename, crc] mappings for all
@@ -61,4 +62,48 @@ object Utils {
     checksum.getValue()
   }
 
+  /**
+   *
+   * @param oldMap,
+   * @param newMap, who's key set are subset of oldMap's key set
+   * @return Either list of corrupted files
+   *         Or true
+   */
+  def compareCRCMaps(oldMap: Map[String, Long], newMap: Map[String, Long]):
+      Either[List[String],Boolean] = {
+    val corruptedFiles = newMap.foldLeft(List[String]()){
+      (either, kv) => if (oldMap exists (_ == kv)) either else kv._1 :: either
+    }
+    if (corruptedFiles.isEmpty)
+      Right(true)
+    else
+      Left(corruptedFiles)
+  }
+
+
+
+
+  /*
+  def compareMaps(FSMap: Map[String, Long], toCheckMap: Map[String, Long])
+                 (implicit logger: Option[Logger] = None): Boolean = {
+    val result = toCheckMap.forall(keyValue => belongsToMap(keyValue, FSMap))
+    logger.foreach(_.close())
+    updateSuccessfulCheck()
+    result
+  }
+
+  private def belongsToMap(kv:(String,Long), map: Map[String,Long])
+                          (implicit logger: Option[Logger] = None): Boolean = {
+    var result = false
+    if (map exists (_ == kv)){
+      logger.foreach(_.fileNotChanged(kv._1))
+      result = true
+    }else if (map exists (_._1 == kv._1))
+      logger.foreach(_.fileChangedSince(kv._1,1000))
+    else
+      logger.foreach(_.fileDisappearedSince(kv._1,1000))
+    result
+  }
+
+  */
 }

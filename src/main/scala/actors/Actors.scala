@@ -14,7 +14,7 @@ object Messages {
   case class PushRequestFS(remoteWorker: ActorRef)
   case class PushRequestIC(remoteWorker: ActorRef,files: List[String])
   case class PushRequestPC(remoteWorker: ActorRef,files: List[String], period: FiniteDuration)
-
+  case class PushRequestPCStop(worker: ActorRef)
 
   case class RequestFS()
   case class FS(filesystem: List[String])
@@ -22,59 +22,73 @@ object Messages {
   case class Error()
 
   case class InitialCheck(files: List[String])
-  case class InitialCheckResult(result: Map[String, Long])
+  case class InitialCheckOk()
 
   case class PeriodicCheck(files: List[String], period: FiniteDuration)
   case class PeriodicCheckResult(result: Either[List[String],Boolean])
-  case class PeriodicCheckUpdate(files: List[String])
+
   case class PeriodicCheckStop()
 
+}
+
+class PeriodicCheckRequester extends Actor {
+  import Messages._
+  def receive = {
+
+    case PushRequestPC(worker,files,period) =>
+      worker ! PeriodicCheck(files,period)
+
+    case PushRequestPCStop(worker) =>
+      worker ! PeriodicCheckStop()
+
+    case PeriodicCheckResult(result) =>
+      result match {
+        case Left(left) => println(left.mkString("\n"))
+        case Right(bool) => println("success!")
+      }
+  }
 }
 
 class PeriodicalCheckActor extends Actor {
   import Messages._
   import context.{dispatcher,system}
-  import model.FSStorage._
 
-  var task: Option[Cancellable] = None
+  var task:Option[Cancellable] = None
 
   def receive = {
-    case PeriodicCheck(files,dur) =>
-      val master = sender
 
+    case PeriodicCheck(files, period) =>
+      val master = sender
       Future {
-        val oldCRC = workerCRCMaps.get("this worker name").get
-        val currentCRC = Utils.generateMap(files)
-        Utils.compareCRCMaps(oldCRC,currentCRC)
+        val oldMap = model.DataStorage.workerCRCMaps
+        val currentMap = Utils.generateMap(files)
+        Utils.compareCRCMaps(oldMap,currentMap)
       }.onComplete {
         case Success(result) =>
           master ! PeriodicCheckResult(result)
-          task = Some(system.scheduler.scheduleOnce(dur, self, PeriodicCheck(files,dur)))
+          task = Some(system.scheduler.scheduleOnce(period, self, PeriodicCheck(files,period)))
         case Failure(failure) =>
           println("exception occured:" +failure.toString)
       }
 
     case PeriodicCheckStop() =>
-      task.foreach(_.cancel())
+      task foreach( t => t.cancel())
 
   }
 }
 
-
 class InitialCheckRequester extends Actor {
   import Messages._
-  import model.FSStorage._
 
   def receive = {
     case PushRequestIC(worker,files) => {
       worker ! InitialCheck(files)
     }
-    case InitialCheckResult(result) =>
-      workerCRCMaps += (sender.path.toString -> result)
+    case InitialCheckOk() =>
+      println("initial check done")
   }
 
 }
-
 
 class InitialCheckActor extends Actor {
   import Messages._
@@ -87,7 +101,8 @@ class InitialCheckActor extends Actor {
         Utils.generateMap(files)
       }.onComplete {
         case Success(result) =>
-          master ! InitialCheckResult(result)
+          model.DataStorage.workerCRCMaps = result
+          master ! InitialCheckOk()
         case Failure(failure)=>
           master ! Error()
       }
@@ -95,19 +110,14 @@ class InitialCheckActor extends Actor {
 
 }
 
-
-
-
 class FileSystemRequester extends Actor {
   import Messages._
-  import model.FSStorage._
-
   def receive = {
     case PushRequestFS(worker) => {
       worker ! RequestFS()
     }
     case FS(list) => {
-      workerFileSystem += (sender.path.toString -> list)
+      model.DataStorage.workerFileSystem = list
     }
     case Error => {
       println(sender.path.toString + " meet an error while scanning his filesystem ")

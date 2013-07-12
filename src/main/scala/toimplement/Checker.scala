@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 import scala.util.{Success, Failure}
 
 case class InitialCheck(files: List[String])
-case class InitialCheckResult(result: Map[String, Long])
+case class InitialCheckOk(result: Map[String, Long])
 
 case class PeriodicCheck(files: List[String], dur: FiniteDuration)
 case class PeriodicCheckResult(success: Boolean)
@@ -64,7 +64,7 @@ class CheckerActor extends Actor {
       //TODO
     }
 
-    case InitialCheckResult(result) => {
+    case InitialCheckOk(result) => {
       InitialCheckMap = result
     }
 
@@ -81,7 +81,7 @@ class InitialCheckActor extends Actor {
         Map[String, Long]()/*some io*/
       }.onComplete {
         case Success(result) =>
-          context.parent ! InitialCheckResult(result)
+          context.parent ! InitialCheckOk(result)
         case Failure(failure)=>
           println("faild")
           /* shoulda be an exception for parent-supervisor plus logging*/

@@ -7,6 +7,5 @@ class Value {
   
   
   var moneyCounter = new Value 
-  moneyCounter add 12
-  
+  moneyCounter add 12  
   println(moneyCounter.sum)

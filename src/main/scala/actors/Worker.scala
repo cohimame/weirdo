@@ -20,38 +20,31 @@ object Worker extends App {
     val worker1_pc = system.actorOf(Props[PeriodicalCheckActor], "worker1_pc")
   }
 
+
+  // Acquire filesystem list
   Admin.fsRequester ! PushRequestFS(Worker1.worker1_fs)
 
   system.scheduler.scheduleOnce( 2 seconds ){
     println(model.DataStorage.workerFileSystem)
   }
 
+  // Ask worker for initial check
   system.scheduler.scheduleOnce( 3 seconds ){
-    val slice = model.DataStorage.workerFileSystem.slice(2,6)
-    Admin.iCheckRequester ! PushRequestIC(Worker1.worker1_ic,slice)
+    val whole = model.DataStorage.workerFileSystem
+    Admin.iCheckRequester ! PushRequestIC(Worker1.worker1_ic,whole)
   }
 
-
-
-  /*
-  fsRequester ! PushRequestFS(worker1_fs)
-  system.scheduler.scheduleOnce( 2 seconds ){
-    println(workerFileSystem)
-    //println(workerFileSystem.get(worker1_fs.path.toString))
-  }
-
-  system.scheduler.scheduleOnce( 3 seconds ){
-    iCheckRequester ! PushRequestIC(
-      worker1_ic,
-      workerFileSystem.get(worker1_fs.path.toString).get)
-  }
 
   system.scheduler.scheduleOnce( 6 seconds ){
-    println(workerCRCMaps)
-    //println(workerFileSystem.get(worker1_fs.path.toString))
+    println(model.DataStorage.workerCRCMaps)
   }
 
-  */
+  system.scheduler.scheduleOnce(7 seconds){
+    val slice = model.DataStorage.workerFileSystem.slice(0,5)
 
-  system.scheduler.scheduleOnce( 12 seconds ){ system.shutdown() }
+    Admin.pCheckRequester ! PushRequestPC(Worker1.worker1_pc, slice, 20 seconds)
+  }
+
+
+  system.scheduler.scheduleOnce( 120 seconds ){ system.shutdown() }
 }

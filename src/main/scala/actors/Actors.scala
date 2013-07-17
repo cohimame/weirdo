@@ -54,19 +54,30 @@ class PeriodicalCheckActor extends Actor {
   import context.{dispatcher,system}
 
   var task:Option[Cancellable] = None
+  var master: ActorRef = _
+
+  case class OnceMore(files: List[String], period: FiniteDuration)
 
   def receive = {
 
     case PeriodicCheck(files, period) =>
-      val master = sender
+      task foreach( t => t.cancel())
+      master = sender
+      self ! OnceMore(files, period)
+
+    case OnceMore(files, period) =>
       Future {
         val oldMap = model.DataStorage.workerCRCMaps
         val currentMap = Utils.generateMap(files)
         Utils.compareCRCMaps(oldMap,currentMap)
       }.onComplete {
-        case Success(result) =>
-          master ! PeriodicCheckResult(result)
-          task = Some(system.scheduler.scheduleOnce(period, self, PeriodicCheck(files,period)))
+        case Success(right @ Right(result)) =>
+          master ! PeriodicCheckResult(right)
+          task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
+
+        case Success(left) =>
+          master ! PeriodicCheckResult(left)
+
         case Failure(failure) =>
           println("exception occured:" +failure.toString)
       }

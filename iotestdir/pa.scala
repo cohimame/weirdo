@@ -5,7 +5,6 @@ class Value {
     def add(y:Int): Unit = sum += y
   }
   
-  
   var moneyCounter = new Value 
   moneyCounter add 12  
   println(moneyCounter.sum)

@@ -2,7 +2,6 @@ package actors.utils
 
 import java.io._
 
-
 object Utils {
 
   private val root = new File("./iotestdir/")

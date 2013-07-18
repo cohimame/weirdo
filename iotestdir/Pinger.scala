@@ -6,7 +6,6 @@ import akka.actor.{ActorSystem, Props, Actor}//, Inbox} only in akka2.2
 import scala.concurrent.duration._
 import akka.actor.{ 
   
-
   ActorInitializationException, 
   ActorKilledException,
   OneForOneStrategy 

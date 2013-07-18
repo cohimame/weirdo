@@ -1,8 +1,12 @@
-package actors
-
+import actors.{PeriodicalCheckActor, PeriodicCheckRequester, InitialCheckRequester, FileSystemRequester}
 import akka.actor.{Actor,ActorSystem,Props}
 import scala.concurrent.duration._
 import actors.Messages._
+
+
+
+
+/*
 
 object Worker extends App {
   val system = ActorSystem("system")
@@ -40,7 +44,7 @@ object Worker extends App {
   }
 
   system.scheduler.scheduleOnce(7 seconds){
-    val slice = model.DataStorage.workerFileSystem.slice(0,5)
+    val slice = model.DataStorage.workerFileSystem//.slice(0,5)
 
     Admin.pCheckRequester ! PushRequestPC(Worker1.worker1_pc, slice, 20 seconds)
   }
@@ -48,3 +52,6 @@ object Worker extends App {
 
   system.scheduler.scheduleOnce( 120 seconds ){ system.shutdown() }
 }
+
+
+*/

@@ -1,4 +1,4 @@
-package actors
+package worker
 
 import akka.actor.{Props, Actor, ActorRef, Cancellable}
 import scala.concurrent.Future
@@ -7,8 +7,8 @@ import scala.concurrent.duration._
 import actors.utils.Utils
 import actors.Messages._
 
-class WorkerActor extends Actor {
-  val fsScanner = context.actorOf(Props[FileSystemActor])
+class WorkerActor(path: String) extends Actor {
+  val fsScanner = context.actorOf(Props{new FileSystemActor(path)})
   val initChecker = context.actorOf(Props[InitialCheckActor])
   val periodicalChecker = context.actorOf(Props[PeriodicalCheckActor])
 
@@ -22,7 +22,6 @@ class WorkerActor extends Actor {
 }
 
 class PeriodicalCheckActor extends Actor {
-  import Messages._
   import context.{dispatcher,system}
 
   var task: Option[Cancellable] = None
@@ -39,7 +38,7 @@ class PeriodicalCheckActor extends Actor {
 
     case OnceMore(files, period) =>
       Future {
-        val oldMap = model.DataStorage.workerCRCMaps
+        val oldMap = model.WorkerDataStorage.workerCRCMaps
         val currentMap = Utils.generateMap(files)
         Utils.compareCRCMaps(oldMap,currentMap)
       }.onComplete {
@@ -62,7 +61,6 @@ class PeriodicalCheckActor extends Actor {
 }
 
 class InitialCheckActor extends Actor {
-  import Messages._
   import context.dispatcher
 
   def receive = {
@@ -72,7 +70,7 @@ class InitialCheckActor extends Actor {
         Utils.generateMap(files)
       }.onComplete {
         case Success(result) =>
-          model.DataStorage.workerCRCMaps = result
+          model.WorkerDataStorage.workerCRCMaps = result
           master ! InitialCheckOk()
         case Failure(failure)=>
           master ! FSScanError()
@@ -82,15 +80,14 @@ class InitialCheckActor extends Actor {
 
 }
 
-class FileSystemActor extends Actor {
-  import Messages._
+class FileSystemActor(root: String) extends Actor {
   import context.dispatcher
 
   def receive = {
     case RequestFS() => {
       val master = sender
       Future {
-        Utils.getFileSystem()
+        Utils.getFileSystem(root)
       }.onComplete {
         case Success(list) =>
           master ! FS(list)

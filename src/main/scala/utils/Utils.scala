@@ -4,10 +4,9 @@ import java.io._
 
 object Utils {
 
-  private val root = new File("./iotestdir/")
-
-  def getFileSystem(): List[String] = {
-    exploreFileTree(List(root)) map (_.getAbsolutePath)
+  def getFileSystem(root: String): List[String] = {
+    val rootF = new File(root)
+    exploreFileTree(List(rootF)) map (_.getAbsolutePath)
   }
 
   def exploreFileTree(files: List[File]): List[File] = files match {

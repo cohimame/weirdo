@@ -13,7 +13,9 @@ class WorkerActor(path: String) extends Actor {
   val periodicalChecker = context.actorOf(Props[PeriodicalCheckActor])
 
   def receive = {
-    case msg @ RequestFS() => fsScanner forward msg
+    case msg @ RequestFS() =>
+      println("WorkerActor got request from" + sender)
+      fsScanner forward msg
     case msg @ InitialCheck(files) => initChecker forward msg
     case msg @ PeriodicCheckStop() => periodicalChecker forward msg
     case msg @ PeriodicCheck(files, period) => periodicalChecker forward msg
@@ -86,11 +88,13 @@ class FileSystemActor(root: String) extends Actor {
   def receive = {
     case RequestFS() => {
       val master = sender
+      print("FSactor got request from" + master)
       Future {
         Utils.getFileSystem(root)
       }.onComplete {
         case Success(list) =>
           master ! FS(list)
+          //println("sending " + list.mkString("\n") +"to " + master)
         case Failure(exception) =>
           master ! FSScanError
           println(exception)

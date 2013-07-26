@@ -5,7 +5,26 @@ import Messages._
 import akka.actor.{Actor,ActorSystem,Props}
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
-import admin.{AdminActor}
+import admin.{AdminActor_mini,AdminActor_mini2, AdminActor}
+
+
+object Admin {
+  def main(args: Array[String]) {
+    val system = ActorSystem("admin-system", ConfigFactory.load.getConfig("Admin"))
+
+    val admin = system.actorOf(Props[AdminActor_mini2], "admin")
+    val worker = system.actorFor("akka://worker-system@localhost:3001/user/Worker1")
+
+    import system.dispatcher
+
+    admin ! PushRequestFS(worker)
+
+
+    system.scheduler.scheduleOnce( 20 seconds ){ system.shutdown() }
+  }
+}
+
+/*
 
 object Admin {
 
@@ -31,7 +50,7 @@ object Admin {
       admin ! PushRequestFS(worker3)
       */
 
-    system.scheduler.scheduleOnce( 16 seconds ){
+    system.scheduler.scheduleOnce( 4 seconds ){
       val fS = model.AdminDataStorage.workerFileSystem
       fS.foreach( (record) => println(record._1 + "" + record._2.mkString("\n"))  )
     }
@@ -52,6 +71,8 @@ object Admin {
 
 
 }
+
+*/
 
 /*
 

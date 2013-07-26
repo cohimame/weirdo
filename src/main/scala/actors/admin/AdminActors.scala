@@ -3,6 +3,19 @@ package admin
 import akka.actor.Actor
 import actors.Messages._
 
+
+class AdminActor_mini extends Actor {
+  def receive = {
+    case PushRequestFS(worker) =>
+      println("got push req from:" + sender +" to ask " + worker )
+      worker ! RequestFS()
+  }
+}
+
+class AdminActor_mini2 extends Actor with FileSystemRequester {
+  def receive = fsRequest
+}
+
 class AdminActor extends Actor
   with FileSystemRequester
   with InitialCheckRequester
@@ -15,9 +28,11 @@ trait FileSystemRequester { self:Actor =>
 
   def fsRequest: Receive = {
     case PushRequestFS(worker) =>
+      println("got push req from:" + sender +" to ask " + worker )
       worker ! RequestFS()
 
     case FS(list) =>
+      println(sender +":" + list.mkString("\n"))
       model.AdminDataStorage.workerFileSystem += (sender.path -> list)
 
     case FSScanError =>

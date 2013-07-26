@@ -4,18 +4,6 @@ import akka.actor.Actor
 import actors.Messages._
 
 
-class AdminActor_mini extends Actor {
-  def receive = {
-    case PushRequestFS(worker) =>
-      println("got push req from:" + sender +" to ask " + worker )
-      worker ! RequestFS()
-  }
-}
-
-class AdminActor_mini2 extends Actor with FileSystemRequester {
-  def receive = fsRequest
-}
-
 class AdminActor extends Actor
   with FileSystemRequester
   with InitialCheckRequester
@@ -24,11 +12,10 @@ class AdminActor extends Actor
     def receive = fsRequest orElse initialCheck orElse periodicCheck
 }
 
-trait FileSystemRequester { self:Actor =>
+trait FileSystemRequester { this:Actor =>
 
   def fsRequest: Receive = {
     case PushRequestFS(worker) =>
-      println("got push req from:" + sender +" to ask " + worker )
       worker ! RequestFS()
 
     case FS(list) =>
@@ -42,7 +29,7 @@ trait FileSystemRequester { self:Actor =>
 
 }
 
-trait InitialCheckRequester { self: Actor =>
+trait InitialCheckRequester { this: Actor =>
 
   def initialCheck: Receive = {
     case PushRequestIC(worker,files) =>
@@ -54,7 +41,7 @@ trait InitialCheckRequester { self: Actor =>
 
 }
 
-trait PeriodicCheckRequester { self: Actor =>
+trait PeriodicCheckRequester { this: Actor =>
 
   def periodicCheck: Receive = {
     case PushRequestPC(worker,files,period) =>

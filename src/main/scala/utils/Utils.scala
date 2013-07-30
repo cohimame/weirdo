@@ -4,6 +4,9 @@ import java.io._
 
 object Utils {
 
+
+
+
   def getFileSystem(root: String): List[String] = {
     val rootF = new File(root)
     exploreFileTree(List(rootF)) map (_.getAbsolutePath)
@@ -77,6 +80,9 @@ object Utils {
     else
       Left(corruptedFiles)
   }
+
+
+
 
 
 

@@ -13,9 +13,6 @@ object Worker {
     val system = ActorSystem("worker-system", ConfigFactory.load.getConfig(configName))
     val worker = system.actorOf(Props{ new WorkerActor(dir)}, configName)
 
-    println("worker:"+worker.path)
-
-
     import system.dispatcher
     system.scheduler.scheduleOnce( 40 seconds ){ system.shutdown() }
 

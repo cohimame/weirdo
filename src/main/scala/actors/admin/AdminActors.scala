@@ -20,7 +20,7 @@ trait FileSystemRequester { this:Actor =>
 
     case FS(list) =>
       println(sender +":" + list.mkString("\n"))
-      model.AdminDataStorage.workerFileSystem += (sender.path -> list)
+      model.AdminDataStorage.putWorkerFS(sender,list)
 
     case FSScanError =>
       println(sender.path.toString + " meet an error while scanning his filesystem ")

@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import admin.AdminActor
 
-/*
+/**/
 object Admin {
   def main(args: Array[String]) {
     val system = ActorSystem("admin-system", ConfigFactory.load.getConfig("Admin"))
@@ -17,18 +17,19 @@ object Admin {
 
     println(admin.path)
 
+
     import system.dispatcher
 
-    system.scheduler.scheduleOnce( 5 seconds ){ admin ! PushRequestFS(worker) }
+    //system.scheduler.scheduleOnce( 5 seconds ){ admin ! PushRequestFS(worker) }
 
 
     system.scheduler.scheduleOnce( 20 seconds ){ system.shutdown() }
   }
 }
 
-*/
 
 
+/*
 
 object Admin {
 
@@ -76,7 +77,7 @@ object Admin {
 
 }
 
-
+*/
 
 /*
 

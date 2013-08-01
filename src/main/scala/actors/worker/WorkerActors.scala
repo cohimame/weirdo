@@ -1,4 +1,4 @@
-package worker
+package actors.admin
 
 import akka.actor.{Props, Actor, ActorRef, Cancellable}
 import scala.concurrent.Future
@@ -6,6 +6,7 @@ import scala.util.{Failure, Success}
 import scala.concurrent.duration._
 import actors.utils.Utils
 import actors.Messages._
+import model.WorkerDataStorage
 
 class WorkerActor(path: String) extends Actor {
   val fsScanner = context.actorOf(Props{new FileSystemActor(path)})
@@ -40,10 +41,11 @@ class PeriodicalCheckActor extends Actor {
 
     case OnceMore(files, period) =>
       Future {
-        val oldMap = model.WorkerDataStorage.workerCRCMaps
+        val oldMap = WorkerDataStorage.workerCRCMaps
         val currentMap = Utils.generateMap(files)
         Utils.compareCRCMaps(oldMap,currentMap)
       }.onComplete {
+
         case Success(right @ Right(result)) =>
           master ! PeriodicCheckResult(right)
           task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))

@@ -1,7 +1,8 @@
-package admin
+package actors.admin
 
 import akka.actor.Actor
 import actors.Messages._
+import model.AdminDataStorage
 
 
 class AdminActor extends Actor
@@ -19,8 +20,8 @@ trait FileSystemRequester { this:Actor =>
       worker ! RequestFS()
 
     case FS(list) =>
-      println(sender +":" + list.mkString("\n"))
-      model.AdminDataStorage.putWorkerFS(sender,list)
+      //println(sender +":" + list.mkString("\n"))
+      AdminDataStorage.putWorkerFS(sender,list)
 
     case FSScanError =>
       println(sender.path.toString + " meet an error while scanning his filesystem ")

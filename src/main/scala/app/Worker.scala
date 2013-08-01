@@ -1,9 +1,9 @@
 package app
 
-import akka.actor.{Actor,ActorSystem,Props}
+import akka.actor.{ActorSystem,Props}
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
-import worker.WorkerActor
+import actors.admin.WorkerActor
 
 object Worker {
   def main(args: Array[String]) {

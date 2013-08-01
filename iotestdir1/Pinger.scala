@@ -34,7 +34,6 @@ class PingerSuperV extends Actor {
 
 }
 
-
 object PingerApp extends App {
   val system = ActorSystem(
     "pingersystem", 

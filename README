@@ -1,1 +1,20 @@
-akka
+Multiple main classes detected, select one to run:
+
+ [1] app.Worker
+ [2] app.Admin
+
+
+So, for Worker<1-3> use command(quotation marks required):
+
+sbt "run Worker<1-3> iotestdir<1-3>"
+
+
+Or run sbt, in sbt type
+
+run Worker<1-3> iotestdir<1-3>
+
+
+For Admin app just:
+
+sbt run
+

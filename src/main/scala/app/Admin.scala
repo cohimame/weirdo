@@ -1,7 +1,7 @@
 package app
 
 import actors.Messages._
-import akka.actor.{ActorSystem,Props}
+import akka.actor.{ActorSystem, Props}
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import actors.admin.AdminActor
@@ -22,24 +22,25 @@ object Admin {
 
     val workers = List(worker1,worker2,worker3)
 
+
     system.scheduler.scheduleOnce( 3 seconds ) {
-
       workers foreach { admin ! PushRequestFS(_) }
-
     }
 
     system.scheduler.scheduleOnce( 7 seconds ) {
-      workers foreach {
-        AdminDataStorage.getWorkerFS(_) foreach {
+      workers foreach { w =>
+        println(w + "\'s filesystem:")
+        AdminDataStorage.getWorkerFS(w) foreach {
             f => println(f.mkString("\n"))
         }
       }
     }
 
     system.scheduler.scheduleOnce( 8 seconds ) {
-      workers foreach {
-        AdminDataStorage.getWorkerFS(_) foreach {
-          f => admin ! PushRequestIC(worker1,f)
+      workers foreach { w =>
+        val fs: Option[List[String]] = AdminDataStorage.getWorkerFS(w)
+        fs foreach {
+          f => admin ! PushRequestIC(w,f)
         }
       }
     }
@@ -51,7 +52,7 @@ object Admin {
           AdminDataStorage.getWorkerFS(w) foreach {
             f =>
               val (p1,p2) = f.splitAt(4)
-              admin ! PushRequestPC(w,p1, 5 seconds)
+              admin ! PushRequestPC(w,p1 ::: p2, 5 seconds)
         }
       }
 

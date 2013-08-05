@@ -1,6 +1,6 @@
 package model
 
-import akka.actor.{ActorRef, ActorPath}
+import akka.actor.ActorRef
 
 object AdminDataStorage {
   private var workerFileSystem = Map[String, List[String]]()

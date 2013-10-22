@@ -50,20 +50,22 @@ class PeriodicalCheckActor extends Actor {
         cM <- currentMap
       } yield Utils.compareCRCMaps(oM,cM) 
 
-      result map { r => (files,period,r) } pipeTo self
+      result map { r => 
+        r match {
+          case Right(result) => (files,period,result)
+          case Left(error) => (files,period,error)
+        } 
+       } pipeTo self
     }
 
-    case (files:List[String], period: FiniteDuration, either: Either[List[String],Boolean]) =>
-      either match {
 
-        case Right(result) => 
-          master ! PeriodicCheckResult(right)
-          task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
+    case (files:List[String], period: FiniteDuration, rigth: Boolean) =>
+      master ! PeriodicCheckResult(right)
+      task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
 
-        case Left(error) => 
-          master ! PeriodicCheckResult(left)
-      }
-      
+    case (files:List[String], period: FiniteDuration, left: List[String]) =>
+      master ! PeriodicCheckResult(left)
+
     case (files, period, Failure(failure) ) => 
       println("exception occured:" +failure.toString)
 

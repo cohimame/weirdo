@@ -39,23 +39,30 @@ class PeriodicalCheckActor extends Actor {
       master = sender
       self ! OnceMore(files, period)
 
-    case OnceMore(files, period) =>
-      Future {
-        val oldMap = WorkerDataStorage.workerCRCMaps
-        val currentMap = Utils.generateMap(files)
-        Utils.compareCRCMaps(oldMap,currentMap)
-      }.onComplete {
+    case OnceMore(files, period) => {
+      val oldMap = Future( WorkerDataStorage.workerCRCMaps )  
+      val currentMap = Future( Utils.generateMap(files) )
 
-        case Success(right @ Right(result)) =>
-          master ! PeriodicCheckResult(right)
-          task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
+      val result = for {
+        oM <- oldMap
+        cM <- currentMap
+        r <- Utils.compareCRCMaps(oM,cM)
+      } yield r 
 
-        case Success(left) =>
-          master ! PeriodicCheckResult(left)
+      result map { r => (files,period,r) } pipeTo self
+    }
 
-        case Failure(failure) =>
-          println("exception occured:" +failure.toString)
-      }
+    case (files, period, Success(right @ Right(result)) ) =>
+      master ! PeriodicCheckResult(right)
+      task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
+
+    case (files, period, Success(left) ) =>
+      master ! PeriodicCheckResult(left)
+
+    case (files, period, Failure(failure) ) => 
+      println("exception occured:" +failure.toString)
+
+   
 
     case PeriodicCheckStop() =>
       task foreach( t => t.cancel())

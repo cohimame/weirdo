@@ -83,11 +83,7 @@ object Utils {
 
 
 
-
-
-
-
-  /*
+/*
   def compareMaps(FSMap: Map[String, Long], toCheckMap: Map[String, Long])
                  (implicit logger: Option[Logger] = None): Boolean = {
     val result = toCheckMap.forall(keyValue => belongsToMap(keyValue, FSMap))
@@ -109,5 +105,5 @@ object Utils {
     result
   }
 
-  */
+*/
 }

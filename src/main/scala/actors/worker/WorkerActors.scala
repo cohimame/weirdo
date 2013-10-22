@@ -1,9 +1,11 @@
 package actors.admin
 
+import akka.pattern.pipe
 import akka.actor.{Props, Actor, ActorRef, Cancellable}
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
+
 import actors.utils.Utils
 import actors.Messages._
 import model.WorkerDataStorage
@@ -46,23 +48,24 @@ class PeriodicalCheckActor extends Actor {
       val result = for {
         oM <- oldMap
         cM <- currentMap
-        r <- Utils.compareCRCMaps(oM,cM)
-      } yield r 
+      } yield Utils.compareCRCMaps(oM,cM) 
 
       result map { r => (files,period,r) } pipeTo self
     }
 
-    case (files, period, Success(right @ Right(result)) ) =>
-      master ! PeriodicCheckResult(right)
-      task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
+    case (files:List[String], period: FiniteDuration, either: Either[List[String],Boolean]) =>
+      either match {
 
-    case (files, period, Success(left) ) =>
-      master ! PeriodicCheckResult(left)
+        case Right(result) => 
+          master ! PeriodicCheckResult(right)
+          task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
 
+        case Left(error) => 
+          master ! PeriodicCheckResult(left)
+      }
+      
     case (files, period, Failure(failure) ) => 
       println("exception occured:" +failure.toString)
-
-   
 
     case PeriodicCheckStop() =>
       task foreach( t => t.cancel())

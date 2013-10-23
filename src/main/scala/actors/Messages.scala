@@ -17,6 +17,8 @@ object Messages {
   case class InitialCheckOk()
 
   case class PeriodicCheck(files: List[String], period: FiniteDuration)
-  case class PeriodicCheckResult(result: Either[List[String],Boolean])
+  case class PeriodicCheckSuccess(result: Boolean)
+  case class PeriodicCheckFailure(result: List[String])
+
   case class PeriodicCheckStop()
 }

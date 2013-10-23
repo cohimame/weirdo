@@ -33,6 +33,9 @@ class PeriodicalCheckActor extends Actor {
   var master: ActorRef = _
 
   case class OnceMore(files: List[String], period: FiniteDuration)
+  case class SuccessfulCheck(files:List[String], period: FiniteDuration, rigth: Boolean)
+  case class FailedCheck(files:List[String], period: FiniteDuration, left: List[String])
+  //case class FutureExecutionFailure((files:List[String], period: FiniteDuration, failure: Failure ))
 
   def receive = {
 
@@ -52,22 +55,35 @@ class PeriodicalCheckActor extends Actor {
 
       result map { r => 
         r match {
-          case Right(result) => (files,period,result)
-          case Left(error) => (files,period,error)
+          case Right(result) => SuccessfulCheck(files,period,result)
+          case Left(error) => FailedCheck(files,period,error)
         } 
        } pipeTo self
+
+       /*
+          TODO: use Future.fallbackTo() or Future.recover() to handle future 
+          execution failure and pipe it.  
+          Look, like it was in previous blocking version:
+
+          Future {...}.onComplete {
+            case Success(Right(...)) => ...
+            case Success(Left(...)) => ...
+            case Failure(failure) => ...          
+          }
+       */ 
     }
 
-
-    case (files:List[String], period: FiniteDuration, rigth: Boolean) =>
-      master ! PeriodicCheckResult(right)
+    case SuccessfulCheck(files, period, right) =>
+      master ! PeriodicCheckSuccess(right)
       task = Some(system.scheduler.scheduleOnce(period, self, OnceMore(files,period)))
 
-    case (files:List[String], period: FiniteDuration, left: List[String]) =>
-      master ! PeriodicCheckResult(left)
+    case FailedCheck(files, period, left) =>
+      master ! PeriodicCheckFailure(left)
 
-    case (files, period, Failure(failure) ) => 
-      println("exception occured:" +failure.toString)
+    /* when future fails:    
+      case Failure(failure) => 
+        println("exception occured:" +failure.toString)
+    */  
 
     case PeriodicCheckStop() =>
       task foreach( t => t.cancel())

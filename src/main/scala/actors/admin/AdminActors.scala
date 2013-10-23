@@ -16,6 +16,7 @@ class AdminActor extends Actor
 trait FileSystemRequester { this:Actor =>
 
   def fsRequest: Receive = {
+    
     case PushRequestFS(worker) =>
       worker ! RequestFS()
 
@@ -33,6 +34,7 @@ trait FileSystemRequester { this:Actor =>
 trait InitialCheckRequester { this: Actor =>
 
   def initialCheck: Receive = {
+  
     case PushRequestIC(worker,files) =>
       worker ! InitialCheck(files)
 
@@ -45,16 +47,16 @@ trait InitialCheckRequester { this: Actor =>
 trait PeriodicCheckRequester { this: Actor =>
 
   def periodicCheck: Receive = {
+  
     case PushRequestPC(worker,files,period) =>
       worker ! PeriodicCheck(files,period)
 
     case PushRequestPCStop(worker) =>
       worker ! PeriodicCheckStop()
 
-    case PeriodicCheckResult(result) =>
-      result match {
-        case Left(left) => println(left.mkString("\n"))
-        case Right(_) => println("success!")
-      }
+    case PeriodicCheckSuccess(bool_true) => println("success")
+
+    case PeriodicCheckFailure(list) => println(list.mkString("\n"))
   }
+
 }
